@@ -2,12 +2,11 @@ from __future__ import print_function, division
 
 from itertools import product
 
-from sympy import Tuple, Add, Mul, Matrix, log, expand, sqrt, Rational
+from sympy import Tuple, Add, Mul, Matrix, log, expand, Rational
 from sympy.core.trace import Tr
-from sympy.core.compatibility import u
 from sympy.printing.pretty.stringpict import prettyForm
 from sympy.physics.quantum.dagger import Dagger
-from sympy.physics.quantum.operator import HermitianOperator, OuterProduct, Operator
+from sympy.physics.quantum.operator import HermitianOperator
 from sympy.physics.quantum.represent import represent
 from sympy.physics.quantum.matrixutils import numpy_ndarray, scipy_sparse_matrix, to_numpy
 from sympy.physics.quantum.tensorproduct import TensorProduct, tensor_product_simp
@@ -202,7 +201,7 @@ class Density(HermitianOperator):
         return printer._print(r'\rho', *args)
 
     def _print_operator_name_pretty(self, printer, *args):
-        return prettyForm(unichr('\u03C1'))
+        return prettyForm(unichr('\N{GREEK SMALL LETTER RHO}'))
 
     def _eval_trace(self, **kwargs):
         indices = kwargs.get('indices', [])

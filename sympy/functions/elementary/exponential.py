@@ -90,7 +90,7 @@ class ExpBase(Function):
         if s.func == self.func:
             if s.exp is S.Zero:
                 return True
-            elif s.exp.is_rational:
+            elif s.exp.is_rational and s.exp.is_nonzero:
                 return False
         else:
             return s.is_rational
@@ -271,7 +271,6 @@ class exp(ExpBase):
                 return Mul(*out)*cls(Add(*add), evaluate=False)
 
         elif arg.is_Matrix:
-            from sympy import Matrix
             return arg.exp()
 
     @property
@@ -553,9 +552,11 @@ class log(Function):
         return (1 - 2*(n % 2)) * x**(n + 1)/(n + 1)
 
     def _eval_expand_log(self, deep=True, **hints):
-        from sympy import unpolarify
+        from sympy import unpolarify, expand_log
         from sympy.concrete import Sum, Product
         force = hints.get('force', False)
+        if (len(self.args) == 2):
+            return expand_log(self.func(*self.args), deep=deep, force=force)
         arg = self.args[0]
         if arg.is_Integer:
             # remove perfect powers
@@ -579,7 +580,7 @@ class log(Function):
                 else:
                     nonpos.append(x)
             return Add(*expr) + log(Mul(*nonpos))
-        elif arg.is_Pow:
+        elif arg.is_Pow or isinstance(arg, exp):
             if force or (arg.exp.is_real and arg.base.is_positive) or \
                     arg.base.is_polar:
                 b = arg.base
@@ -596,7 +597,9 @@ class log(Function):
         return self.func(arg)
 
     def _eval_simplify(self, ratio, measure):
-        from sympy.simplify.simplify import expand_log, logcombine, simplify
+        from sympy.simplify.simplify import expand_log, simplify
+        if (len(self.args) == 2):
+            return simplify(self.func(*self.args), ratio=ratio, measure=measure)
         expr = self.func(simplify(self.args[0], ratio=ratio, measure=measure))
         expr = expand_log(expr, deep=True)
         return min([expr, self], key=measure)
@@ -638,7 +641,7 @@ class log(Function):
         if s.func == self.func:
             if (self.args[0] - 1).is_zero:
                 return True
-            if s.args[0].is_rational:
+            if s.args[0].is_rational and (self.args[0] - 1).is_nonzero:
                 return False
         else:
             return s.is_rational
@@ -687,8 +690,6 @@ class log(Function):
         k, l = Wild("k"), Wild("l")
         r = arg.match(k*x**l)
         if r is not None:
-            #k = r.get(r, S.One)
-            #l = r.get(l, S.Zero)
             k, l = r[k], r[l]
             if l != 0 and not l.has(x) and not k.has(x):
                 r = log(k) + l*logx  # XXX true regardless of assumptions?
@@ -780,6 +781,8 @@ class LambertW(Function):
                 return -S.ImaginaryUnit*S.Pi/2
             elif x == -1/S.Exp1:
                 return S.NegativeOne
+            elif x == -2*exp(-2):
+                return -C.Integer(2)
 
     def fdiff(self, argindex=1):
         """
@@ -804,13 +807,18 @@ class LambertW(Function):
         else:
             k = self.args[1]
         if k.is_zero:
-            return (x + 1/S.Exp1).is_positive
+            if (x + 1/S.Exp1).is_positive:
+                return True
+            elif (x + 1/S.Exp1).is_nonpositive:
+                return False
         elif (k + 1).is_zero:
-            from sympy.core.logic import fuzzy_and
-            return fuzzy_and([x.is_negative, (x + 1/S.Exp1).is_positive])
+            if x.is_negative and (x + 1/S.Exp1).is_positive:
+                return True
+            elif x.is_nonpositive or (x + 1/S.Exp1).is_nonnegative:
+                return False
         elif k.is_nonzero and (k + 1).is_nonzero:
-            return False
-
+            if x.is_real:
+                return False
 
     def _eval_is_algebraic(self):
         s = self.func(*self.args)

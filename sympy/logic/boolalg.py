@@ -1443,8 +1443,6 @@ def SOPform(variables, minterms, dontcares=None):
     .. [1] en.wikipedia.org/wiki/Quine-McCluskey_algorithm
 
     """
-    from sympy.core.symbol import Symbol
-
     variables = [sympify(v) for v in variables]
     if minterms == []:
         return false
@@ -1495,8 +1493,6 @@ def POSform(variables, minterms, dontcares=None):
     .. [1] en.wikipedia.org/wiki/Quine-McCluskey_algorithm
 
     """
-    from sympy.core.symbol import Symbol
-
     variables = [sympify(v) for v in variables]
     if minterms == []:
         return false
@@ -1530,7 +1526,7 @@ def _find_predicates(expr):
     """
     if not isinstance(expr, BooleanFunction):
         return set([expr])
-    return set.union(*(_find_predicates(i) for i in expr.args))
+    return set().union(*(_find_predicates(i) for i in expr.args))
 
 
 def simplify_logic(expr, form=None, deep=True):

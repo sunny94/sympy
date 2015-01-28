@@ -219,7 +219,7 @@ class Ynm(Function):
         # Note: works without this function by just calling
         #       mpmath for Legendre polynomials. But using
         #       the dedicated function directly is cleaner.
-        from sympy.mpmath import mp, workprec
+        from mpmath import mp, workprec
         from sympy import Expr
         n = self.args[0]._to_mpmath(prec)
         m = self.args[1]._to_mpmath(prec)
@@ -295,13 +295,9 @@ class Znm(Function):
 
         if m.is_positive:
             zz = (Ynm(n, m, th, ph) + Ynm_c(n, m, th, ph)) / sqrt(2)
-            #zz = zz.expand(complex=True)
-            #zz = simplify(zz)
             return zz
         elif m.is_zero:
             return Ynm(n, m, th, ph)
         elif m.is_negative:
             zz = (Ynm(n, m, th, ph) - Ynm_c(n, m, th, ph)) / (sqrt(2)*I)
-            #zz = zz.expand(complex=True)
-            #zz = simplify(zz)
             return zz

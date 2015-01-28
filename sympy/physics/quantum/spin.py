@@ -6,7 +6,6 @@ from sympy import (Add, binomial, cos, exp, Expr, factorial, I, Integer, Mul,
                    pi, Rational, S, sin, simplify, sqrt, Sum, symbols, sympify,
                    Tuple, Dummy)
 from sympy.core.compatibility import u, unicode
-from sympy.core.evaluate import global_evaluate
 from sympy.matrices import zeros
 from sympy.printing.pretty.stringpict import prettyForm, stringPict
 from sympy.printing.pretty.pretty_symbology import pretty_symbol
@@ -501,7 +500,7 @@ class Rotation(UnitaryOperator):
 
     def _print_operator_name_pretty(self, printer, *args):
         if printer._use_unicode:
-            return prettyForm(u('\u211B') + u(' '))
+            return prettyForm(u('\N{SCRIPT CAPITAL R}') + u(' '))
         else:
             return prettyForm("R ")
 

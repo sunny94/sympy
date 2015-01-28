@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from sympy import (
-    And, Basic, Derivative, Dict, Eq, Equivalent, FF,
+    Add, And, Basic, Derivative, Dict, Eq, Equivalent, FF,
     FiniteSet, Function, Ge, Gt, I, Implies, Integral,
     Lambda, Le, Limit, Lt, Matrix, Mul, Nand, Ne, Nor, Not, O, Or,
     Pow, Product, QQ, RR, Rational, Ray, RootOf, RootSum, S,
     Segment, Subs, Sum, Symbol, Tuple, Xor, ZZ, conjugate,
-    groebner, oo, pi, symbols, lex, ilex, grlex, Range,
-    Complement, Contains)
+    groebner, oo, pi, symbols, ilex, grlex, Range, Contains)
 from sympy.functions import (Abs, Chi, Ci, Ei, KroneckerDelta,
     Piecewise, Shi, Si, atan2, binomial, catalan, ceiling, cos,
     euler, exp, expint, factorial, factorial2, floor, gamma, hyper, log,
@@ -1030,6 +1029,37 @@ y + 1     \
 """)
     assert pretty(expr) in [ascii_str_1, ascii_str_2]
     assert upretty(expr) in [ucode_str_1, ucode_str_2]
+
+
+def test_issue_7117():
+    # See also issue #5031 (hence the evaluate=False in these).
+    e = Eq(x + 1, x/2)
+    q = Mul(2, e, evaluate=False)
+    assert upretty(q) == u("""\
+  ⎛        x⎞\n\
+2⋅⎜x + 1 = ─⎟\n\
+  ⎝        2⎠\
+""")
+    q = Add(e, 6, evaluate=False)
+    assert upretty(q) == u("""\
+    ⎛        x⎞\n\
+6 + ⎜x + 1 = ─⎟\n\
+    ⎝        2⎠\
+""")
+    q = Pow(e, 2, evaluate=False)
+    assert upretty(q) == u("""\
+           2\n\
+⎛        x⎞ \n\
+⎜x + 1 = ─⎟ \n\
+⎝        2⎠ \
+""")
+    e2 = Eq(x, 2)
+    q = Mul(e, e2, evaluate=False)
+    assert upretty(q) == u("""\
+⎛        x⎞        \n\
+⎜x + 1 = ─⎟⋅(x = 2)\n\
+⎝        2⎠        \
+""")
 
 
 def test_pretty_rational():
@@ -3301,18 +3331,18 @@ def test_pretty_Domain():
 
 
 def test_pretty_prec():
-    assert xpretty(S("0.3"), full_prec=True) == "0.300000000000000"
-    assert xpretty(S("0.3"), full_prec="auto") == "0.300000000000000"
-    assert xpretty(S("0.3"), full_prec=False) == "0.3"
-    assert xpretty(S("0.3")*x, full_prec=True, use_unicode=False) in [
+    assert xpretty(S("0.3"), full_prec=True, wrap_line=False) == "0.300000000000000"
+    assert xpretty(S("0.3"), full_prec="auto", wrap_line=False) == "0.300000000000000"
+    assert xpretty(S("0.3"), full_prec=False, wrap_line=False) == "0.3"
+    assert xpretty(S("0.3")*x, full_prec=True, use_unicode=False, wrap_line=False) in [
         "0.300000000000000*x",
         "x*0.300000000000000"
     ]
-    assert xpretty(S("0.3")*x, full_prec="auto", use_unicode=False) in [
+    assert xpretty(S("0.3")*x, full_prec="auto", use_unicode=False, wrap_line=False) in [
         "0.3*x",
         "x*0.3"
     ]
-    assert xpretty(S("0.3")*x, full_prec=False, use_unicode=False) in [
+    assert xpretty(S("0.3")*x, full_prec=False, use_unicode=False, wrap_line=False) in [
         "0.3*x",
         "x*0.3"
     ]
@@ -3325,7 +3355,7 @@ def test_pprint():
     sso = sys.stdout
     sys.stdout = fd
     try:
-        pprint(pi, use_unicode=False)
+        pprint(pi, use_unicode=False, wrap_line=False)
     finally:
         sys.stdout = sso
     assert fd.getvalue() == 'pi\n'

@@ -1,11 +1,9 @@
 from __future__ import division
 
 from sympy import (Basic, Symbol, sin, cos, exp, sqrt, Rational, Float, re, pi,
-        sympify, Add, Mul, Pow, Mod, I, log, S, Max, Or, symbols, oo, Integer,
-        sign, im, nan, cbrt, Dummy
+        sympify, Add, Mul, Pow, Mod, I, log, S, Max, symbols, oo, Integer,
+        sign, im, nan, Dummy, factorial
 )
-from sympy.core.evalf import PrecisionExhausted
-from sympy.core.tests.test_evalf import NS
 from sympy.core.compatibility import long
 from sympy.utilities.iterables import cartes
 from sympy.utilities.pytest import XFAIL, raises
@@ -14,6 +12,11 @@ from sympy.utilities.randtest import verify_numerically
 
 a, c, x, y, z = symbols('a,c,x,y,z')
 b = Symbol("b", positive=True)
+
+
+def same_and_same_prec(a, b):
+    # stricter matching for Floats
+    return a == b and a._prec == b._prec
 
 
 def test_bug1():
@@ -895,7 +898,9 @@ def test_Pow_is_integer():
     m = Symbol('m', integer=True, positive=True)
 
     assert (k**2).is_integer is True
-    assert (k**(-2)).is_integer is False
+    assert (k**(-2)).is_integer is None
+    assert ((m + 1)**(-2)).is_integer is False
+    assert (m**(-1)).is_integer is None  # issue 8580
 
     assert (2**k).is_integer is None
     assert (2**(-k)).is_integer is None
@@ -931,6 +936,9 @@ def test_Pow_is_integer():
     assert Pow(S.Half, -2, evaluate=False).is_integer is True
 
     assert ((-1)**k).is_integer
+
+    x = Symbol('x', real=True, integer=False)
+    assert (x**2).is_integer is None  # issue 8641
 
 
 def test_Pow_is_real():
@@ -1498,7 +1506,6 @@ def test_Mod():
     for i in [-3, -2, 2, 3]:
         for j in [-3, -2, 2, 3]:
             for k in range(3):
-                # print i, j, k
                 assert Mod(Mod(k, i), j) == (k % i) % j
 
     # known difference
@@ -1539,6 +1546,10 @@ def test_Mod():
     assert (3*i*x) % (2*i*y) == i*Mod(3*x, 2*y)
     assert Mod(4*i, 4) == 0
 
+    # issue 8677
+    n = Symbol('n', integer=True, positive=True)
+    assert (factorial(n) % n).equals(0) is not False
+
 
 def test_Mod_is_integer():
     p = Symbol('p', integer=True)
@@ -1548,6 +1559,16 @@ def test_Mod_is_integer():
     assert Mod(p, q1).is_integer is None
     assert Mod(x, q2).is_integer is None
     assert Mod(p, q2).is_integer
+
+
+def test_Mod_is_nonposneg():
+    n = Symbol('n', integer=True)
+    k = Symbol('k', integer=True, positive=True)
+    assert (n%3).is_nonnegative
+    assert Mod(n, -3).is_nonpositive
+    assert Mod(n, k).is_nonnegative
+    assert Mod(n, -k).is_nonpositive
+    assert Mod(k, n).is_nonnegative is None
 
 
 def test_issue_6001():
@@ -1670,8 +1691,8 @@ def test_float_int():
         112345678901234567890123456789000192
     assert Integer(Float('123456789012345678901234567890e5', '')) == \
         12345678901234567890123456789000000
-    assert Float('123000e-2','') == Float('1230.00', '')
-    assert Float('123000e2','') == Float('12300000', '')
+    assert same_and_same_prec(Float('123000e-2',''), Float('1230.00', ''))
+    assert same_and_same_prec(Float('123000e2',''), Float('12300000', ''))
 
     assert int(1 + Rational('.9999999999999999999999999')) == 1
     assert int(pi/1e20) == 0

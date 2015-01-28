@@ -3,15 +3,12 @@ from __future__ import print_function, division
 from sympy.concrete.expr_with_limits import AddWithLimits
 from sympy.concrete.expr_with_intlimits import ExprWithIntLimits
 from sympy.core.basic import C
-from sympy.core.containers import Tuple
-from sympy.core.expr import Expr
 from sympy.core.function import Derivative
 from sympy.core.relational import Eq
 from sympy.core.singleton import S
 from sympy.core.symbol import (Dummy, Wild)
-from sympy.core.sympify import sympify
 from sympy.concrete.gosper import gosper_sum
-from sympy.functions.elementary.piecewise import piecewise_fold, Piecewise
+from sympy.functions.elementary.piecewise import Piecewise
 from sympy.polys import apart, PolynomialError
 from sympy.solvers import solve
 from sympy.core.compatibility import xrange
@@ -73,7 +70,7 @@ class Sum(AddWithLimits,ExprWithIntLimits):
     ========
 
     >>> from sympy.abc import i, k, m, n, x
-    >>> from sympy import Sum, factorial, oo
+    >>> from sympy import Sum, factorial, oo, IndexedBase, Function
     >>> Sum(k,(k,1,m))
     Sum(k, (k, 1, m))
     >>> Sum(k,(k,1,m)).doit()
@@ -88,6 +85,18 @@ class Sum(AddWithLimits,ExprWithIntLimits):
     Piecewise((1/(-x + 1), Abs(x) < 1), (Sum(x**k, (k, 0, oo)), True))
     >>> Sum(x**k/factorial(k),(k,0,oo)).doit()
     exp(x)
+
+    Here are examples to do summation with symbolic indices.  You
+    can use either Function of IndexedBase classes:
+
+    >>> f = Function('f')
+    >>> Sum(f(n), (n, 0, 3)).doit()
+    f(0) + f(1) + f(2) + f(3)
+    >>> Sum(f(n), (n, 0, oo)).doit()
+    Sum(f(n), (n, 0, oo))
+    >>> f = IndexedBase('f')
+    >>> Sum(f[n]**2, (n, 0, 3)).doit()
+    f[0]**2 + f[1]**2 + f[2]**2 + f[3]**2
 
     An example showing that the symbolic result of a summation is still
     valid for seemingly nonsensical values of the limits. Then the Karr
@@ -285,7 +294,7 @@ class Sum(AddWithLimits,ExprWithIntLimits):
         if m:
             if b.is_Integer and a.is_Integer:
                 m = min(m, b - a + 1)
-            if not eps:
+            if not eps or f.is_polynomial(i):
                 for k in range(m):
                     s += f.subs(i, a + k)
             else:
@@ -300,7 +309,7 @@ class Sum(AddWithLimits,ExprWithIntLimits):
                 s += term
                 for k in range(1, m):
                     term = f.subs(i, a + k)
-                    if abs(term.evalf(3)) < eps:
+                    if abs(term.evalf(3)) < eps and term != 0:
                         return s, abs(term)
                     s += term
             if b - a + 1 == m:

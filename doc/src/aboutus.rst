@@ -352,21 +352,39 @@ want to be mentioned here, so see our repository history for a full list).
 #. Ambar Mehrotra: Fix to documentation
 #. Mark Shoulson: Enhanced Egyptian fractions
 #. David P. Sanders: Fix to latex printer
+#. Peter Brady: avoid caching problem by using function instead of lambda
 #. John V. Siratt: Fix to documentation
 #. Sarwar Chahal: Fix to documentation
 #. Nathan Woods: Fix to C code printer
 #. Colin B. Macdonald: Fix to documentation
 #. Marcus Näslund: Fix to documentation
+#. Clemens Novak: improved docstring for apart
+#. Craig A. Stoudt: correct addition of TWave objects
 #. Mridul Seth: correct is_tangent for Ellipse non-intersection
+#. Raj: fixed typos in four files
 #. Mihai A. Ionescu: Improvement to LaplaceTransform
+#. immerrr: add check of SYMPY_DEBUG value
 #. Leonid Blouvshtein: make integrals aware of both limits being +/-oo
+#. Peleg Michaeli: implement the Rademacher distribution
+#. Chai Wah Wu: Implement divisor_sigma function
 #. ck Lux: handle zoo, oo, nan in as_int and round
+#. zsc347: fixed a bug in crypto.rsa_private_key
+#. Hamish Dickson: improve qubit tests
 #. Michael Gallaspy: improve handling of inequalities involving RootOf
 #. Roman Inflianskas: add svg support to preview
 #. Duane Nykamp: improved function handling in parse_expr
 #. Ted Dokos: implemented interleaving for unions
 #. Sunny Aggarwal: fix Integral.transform method
 #. Akshat Jain: nsimplify returns ints quickly
+#. Cody Herbst: modified Euler-MacLaurin to not exit when term == 0
+#. AMiT Kumar: fix sign error in unrad
+#. Nishith Shah: fix solving of Piecewise functions
+#. Guillaume Gay: bugfix for LagrangesMethod
+#. Ray Cathcart: improve error handling in _random
+#. Mihir Wadwekar: watch for duplicate bases in powsimp
+#. Tuan Manh Lai: correct SparseMatrix.is_Identity property
+#. Darshan Chaudhary: cross platform support in setup.py options
+#. Alec Kalinin: fixed simplify and expand_log so base of log is not dropped
 
 Up-to-date list in the order of the first contribution is given in the `AUTHORS
 <https://github.com/sympy/sympy/blob/master/AUTHORS>`_ file.
